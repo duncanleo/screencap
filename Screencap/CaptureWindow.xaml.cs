@@ -26,7 +26,8 @@ namespace Screencap {
     /// Interaction logic for CaptureWindow.xaml
     /// </summary>
     public partial class CaptureWindow : Window {
-        
+        private System.Windows.Point startPoint;
+        private System.Windows.Shapes.Rectangle rect;
 
         public CaptureWindow(CaptureType captureType) {
             InitializeComponent();
@@ -40,6 +41,44 @@ namespace Screencap {
                     Close();
                     break;
             }
+        }
+
+        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e) {
+            startPoint = e.GetPosition(canvas);
+
+            rect = new System.Windows.Shapes.Rectangle {
+                Stroke = System.Windows.Media.Brushes.White,
+                StrokeThickness = 2,
+                Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(10, 255, 255, 255))
+            };
+
+            Canvas.SetLeft(rect, startPoint.X);
+            Canvas.SetTop(rect, startPoint.Y);
+            canvas.Children.Add(rect);
+        }
+
+        private void Canvas_MouseMove(object sender, MouseEventArgs e) {
+            if (e.LeftButton == MouseButtonState.Released || rect == null)
+                return;
+
+            var pos = e.GetPosition(canvas);
+
+            var x = Math.Min(pos.X, startPoint.X);
+            var y = Math.Min(pos.Y, startPoint.Y);
+
+            var w = Math.Max(pos.X, startPoint.X) - x;
+            var h = Math.Max(pos.Y, startPoint.Y) - y;
+
+            rect.Width = w;
+            rect.Height = h;
+
+            Canvas.SetLeft(rect, x);
+            Canvas.SetTop(rect, y);
+        }
+
+        private void canvas_MouseUp(object sender, MouseButtonEventArgs e) {
+            canvas.Children.Remove(rect);
+            rect = null;
         }
 
         private dynamic GetScreenResolution() {
@@ -62,7 +101,7 @@ namespace Screencap {
             return String.Format(
                 "Screen Shot {0} at {1}.png", 
                 dateTime.ToString("yyyy-MM-dd"),
-                dateTime.ToString("H.mm.ss aa")
+                dateTime.ToString("H.mm.ss tt")
             );
         }
 
@@ -77,12 +116,11 @@ namespace Screencap {
                     0,
                     bitmap.Size
                 );
-                
-
-                //Application.Current.MainWindow.Show();
             }
 
             return bitmap;
         }
+
+        
     }
 }

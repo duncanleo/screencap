@@ -26,7 +26,17 @@ namespace Screencap {
         }
 
         private void FullscreenButton_Click(object sender, RoutedEventArgs e) {
-            CaptureWindow captureWindow = new CaptureWindow(CaptureType.FULLSCREEN);
+            new CaptureWindow(CaptureType.FULLSCREEN);
+        }
+
+        private void RegionButton_Click(object sender, RoutedEventArgs e) {
+            var window = new CaptureWindow(CaptureType.REGION);
+            window.Show();
+        }
+
+        private void WindowButton_Click(object sender, RoutedEventArgs e) {
+            var window = new CaptureWindow(CaptureType.WINDOW);
+            window.Show();
         }
     }
 }
