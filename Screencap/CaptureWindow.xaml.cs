@@ -35,7 +35,7 @@ namespace Screencap {
             switch (captureType) {
                 case CaptureType.FULLSCREEN:
                     var screenRes = GetScreenResolution();
-                    var cap = Capture((int)screenRes.Width, (int)screenRes.Height);
+                    var cap = Capture(0, 0, (int)screenRes.Width, (int)screenRes.Height);
                     string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                     cap.Save(System.IO.Path.Combine(path, GenerateFileName()));
                     Close();
@@ -49,7 +49,7 @@ namespace Screencap {
             rect = new System.Windows.Shapes.Rectangle {
                 Stroke = System.Windows.Media.Brushes.White,
                 StrokeThickness = 2,
-                Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(10, 255, 255, 255))
+                Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(20, 0, 0, 0))
             };
 
             Canvas.SetLeft(rect, startPoint.X);
@@ -78,17 +78,40 @@ namespace Screencap {
 
         private void canvas_MouseUp(object sender, MouseButtonEventArgs e) {
             canvas.Children.Remove(rect);
+
+            var dpi = GetDPI();
+
+            // Capture
+            var cap = Capture(
+                (int)(Canvas.GetLeft(rect) * dpi.X), 
+                (int)(Canvas.GetTop(rect) * dpi.Y),
+                (int)(rect.Width * dpi.X), 
+                (int)(rect.Height * dpi.Y)
+            );
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            cap.Save(System.IO.Path.Combine(path, GenerateFileName()));
+
             rect = null;
+            Close();
         }
 
-        private dynamic GetScreenResolution() {
+        private dynamic GetDPI() {
             Window MainWindow = Application.Current.MainWindow;
             PresentationSource MainWindowPresentationSource = PresentationSource.FromVisual(MainWindow);
             Matrix m = MainWindowPresentationSource.CompositionTarget.TransformToDevice;
             var DpiWidthFactor = m.M11;
             var DpiHeightFactor = m.M22;
-            double ScreenHeight = SystemParameters.PrimaryScreenHeight * DpiHeightFactor;
-            double ScreenWidth = SystemParameters.PrimaryScreenWidth * DpiWidthFactor;
+
+            return new {
+                X = m.M11,
+                Y = m.M22
+            };
+        }
+
+        private dynamic GetScreenResolution() {
+            var dpi = GetDPI();
+            double ScreenHeight = SystemParameters.PrimaryScreenHeight * dpi.Y;
+            double ScreenWidth = SystemParameters.PrimaryScreenWidth * dpi.X;
 
             return new {
                 Height = ScreenHeight,
@@ -105,18 +128,19 @@ namespace Screencap {
             );
         }
 
-        private Bitmap Capture(int width, int height) {
+        private Bitmap Capture(int left, int top, int width, int height) {
+            Hide();
             Bitmap bitmap = new Bitmap(width, height);
 
             using (Graphics g = Graphics.FromImage(bitmap)) {
                 g.CopyFromScreen(
-                    (int)SystemParameters.VirtualScreenLeft,
-                    (int)SystemParameters.VirtualScreenTop,
-                    0,
-                    0,
+                    new System.Drawing.Point(left, top),
+                    new System.Drawing.Point(0, 0),
                     bitmap.Size
                 );
             }
+
+            Show();
 
             return bitmap;
         }
