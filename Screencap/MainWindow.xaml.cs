@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace Screencap {
     /// <summary>
@@ -23,44 +25,8 @@ namespace Screencap {
             InitializeComponent();
         }
 
-        private void TestButton_Click(object sender, RoutedEventArgs e) {
-            Application.Current.MainWindow.Hide();
-
-            var res = GetScreenResolution();
-            Bitmap bitmap = new Bitmap(
-                (int)res.Width,
-                (int)res.Height
-            );
-
-            using (Graphics g = Graphics.FromImage(bitmap)) {
-                g.CopyFromScreen(
-                    (int)SystemParameters.VirtualScreenLeft,
-                    (int)SystemParameters.VirtualScreenTop,
-                    0,
-                    0,
-                    bitmap.Size
-                );
-
-                string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                bitmap.Save(System.IO.Path.Combine(path, "test.jpg"));
-
-                Application.Current.MainWindow.Show();
-            }
-        }
-
-        private dynamic GetScreenResolution() {
-            Window MainWindow = Application.Current.MainWindow;
-            PresentationSource MainWindowPresentationSource = PresentationSource.FromVisual(MainWindow);
-            Matrix m = MainWindowPresentationSource.CompositionTarget.TransformToDevice;
-            var DpiWidthFactor = m.M11;
-            var DpiHeightFactor = m.M22;
-            double ScreenHeight = SystemParameters.PrimaryScreenHeight * DpiHeightFactor;
-            double ScreenWidth = SystemParameters.PrimaryScreenWidth * DpiWidthFactor;
-
-            return new {
-                Height = ScreenHeight,
-                Width = ScreenWidth
-            };
+        private void FullscreenButton_Click(object sender, RoutedEventArgs e) {
+            CaptureWindow captureWindow = new CaptureWindow(CaptureType.FULLSCREEN);
         }
     }
 }
