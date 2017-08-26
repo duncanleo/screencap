@@ -108,8 +108,8 @@ namespace Screencap {
                             Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(70, 235, 248, 254))
                         };
 
-                        Canvas.SetLeft(rect, window.Rect.Left / dpi.X);
-                        Canvas.SetTop(rect, window.Rect.Top / dpi.Y);
+                        Canvas.SetLeft(rect, window.Rect.Left / dpi.X - Left);
+                        Canvas.SetTop(rect, window.Rect.Top / dpi.Y - Top);
                         rect.Width = (window.Rect.Right - window.Rect.Left + 1) / dpi.X;
                         rect.Height = (window.Rect.Bottom - window.Rect.Top + 1) / dpi.Y;
 
