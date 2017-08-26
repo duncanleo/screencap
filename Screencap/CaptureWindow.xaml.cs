@@ -105,13 +105,13 @@ namespace Screencap {
                             canvas.Children.Remove(rect);
                         }
                         rect = new System.Windows.Shapes.Rectangle {
-                            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(70, 235, 248, 254))
+                            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(90, 235, 248, 254))
                         };
 
                         Canvas.SetLeft(rect, window.Rect.Left / dpi.X - Left);
                         Canvas.SetTop(rect, window.Rect.Top / dpi.Y - Top);
-                        rect.Width = (window.Rect.Right - window.Rect.Left + 1) / dpi.X;
-                        rect.Height = (window.Rect.Bottom - window.Rect.Top + 1) / dpi.Y;
+                        rect.Width = Math.Floor((window.Rect.Right - window.Rect.Left) / dpi.X);
+                        rect.Height = Math.Floor((window.Rect.Bottom - window.Rect.Top) / dpi.Y);
 
                         Console.WriteLine(
                             "Drawing rect at X={0} Y={1} w={2} h={3}", 
@@ -142,13 +142,14 @@ namespace Screencap {
             canvas.Children.Remove(rect);
 
             var dpi = GetDPI();
+            var res = GetScreenResolution();
 
             // Capture
             var cap = Capture(
-                (int)(Canvas.GetLeft(rect) * dpi.X),
-                (int)(Canvas.GetTop(rect) * dpi.Y),
-                (int)(rect.Width * dpi.X),
-                (int)(rect.Height * dpi.Y)
+                (int)(Canvas.GetLeft(rect) * dpi.X + Left),
+                (int)(Canvas.GetTop(rect) * dpi.Y + Top),
+                (int)(rect.Width * dpi.X + Left / dpi.X),
+                (int)(rect.Height * dpi.Y + Top/ dpi.Y)
             );
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             cap.Save(System.IO.Path.Combine(path, GenerateFileName()));
