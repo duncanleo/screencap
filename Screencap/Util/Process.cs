@@ -16,6 +16,9 @@ namespace Screencap.Util {
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
 
+        [DllImport("USER32.DLL")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT {
             public int Left;        // x position of upper-left corner
@@ -36,6 +39,7 @@ namespace Screencap.Util {
         public struct Window {
             public string Name;
             public RECT Rect;
+            public Process Process;
         }
 
         public static List<Window> GetOpenWindows() {
@@ -57,7 +61,8 @@ namespace Screencap.Util {
                    }
                    return new Window {
                        Name = p.MainWindowTitle,
-                       Rect = rect
+                       Rect = rect,
+                       Process = p
                    };
                })
                .ToList();

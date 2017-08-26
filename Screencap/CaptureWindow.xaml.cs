@@ -105,9 +105,7 @@ namespace Screencap {
                             canvas.Children.Remove(rect);
                         }
                         rect = new System.Windows.Shapes.Rectangle {
-                            Stroke = System.Windows.Media.Brushes.White,
-                            StrokeThickness = 2,
-                            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(20, 0, 0, 0))
+                            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(70, 235, 248, 254))
                         };
 
                         Canvas.SetLeft(rect, window.Rect.Left / dpi.X);
@@ -126,6 +124,7 @@ namespace Screencap {
                         canvas.Children.Add(rect);
 
                         if (e.LeftButton == MouseButtonState.Pressed) {
+                            ProcessUtil.SetForegroundWindow(window.Process.MainWindowHandle);
                             captureHandler(sender, null);
                         }
                     }
