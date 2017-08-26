@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using Screencap.Util;
 
 namespace Screencap {
     public enum CaptureType {
@@ -66,37 +67,88 @@ namespace Screencap {
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e) {
-            if (e.LeftButton == MouseButtonState.Released || rect == null || this.captureType != CaptureType.REGION)
+            if (this.captureType != CaptureType.WINDOW && (e.LeftButton == MouseButtonState.Released || rect == null))
                 return;
 
             var pos = e.GetPosition(canvas);
+            var dpi = GetDPI();
 
-            var x = Math.Min(pos.X, startPoint.X);
-            var y = Math.Min(pos.Y, startPoint.Y);
+            switch (this.captureType) {
+                case CaptureType.REGION:
+                    var x = Math.Min(pos.X, startPoint.X);
+                    var y = Math.Min(pos.Y, startPoint.Y);
 
-            var w = Math.Max(pos.X, startPoint.X) - x;
-            var h = Math.Max(pos.Y, startPoint.Y) - y;
+                    var w = Math.Max(pos.X, startPoint.X) - x;
+                    var h = Math.Max(pos.Y, startPoint.Y) - y;
 
-            rect.Width = w;
-            rect.Height = h;
+                    rect.Width = w;
+                    rect.Height = h;
 
-            Canvas.SetLeft(rect, x);
-            Canvas.SetTop(rect, y);
+                    Canvas.SetLeft(rect, x);
+                    Canvas.SetTop(rect, y);
+                    break;
+                case CaptureType.WINDOW:
+                    var window = ProcessUtil.GetOpenWindows()
+                        .Where(win => pos.X >= win.Rect.Left / dpi.X && 
+                                        pos.X <= win.Rect.Right / dpi.X && 
+                                        pos.Y >= win.Rect.Top / dpi.Y && 
+                                        pos.Y <= win.Rect.Bottom / dpi.Y
+                        ).FirstOrDefault();
+                    Console.WriteLine(
+                        "Handling window at X: {0}, Y: {1}. Title: {2}", 
+                        window.Rect.Left / dpi.X, 
+                        window.Rect.Top / dpi.Y, 
+                        window.Name
+                    );
+                    if (window.Rect.Left != window.Rect.Right && window.Rect.Top != window.Rect.Bottom) {
+                        if (rect != null) {
+                            canvas.Children.Remove(rect);
+                        }
+                        rect = new System.Windows.Shapes.Rectangle {
+                            Stroke = System.Windows.Media.Brushes.White,
+                            StrokeThickness = 2,
+                            Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(20, 0, 0, 0))
+                        };
+
+                        Canvas.SetLeft(rect, window.Rect.Left / dpi.X);
+                        Canvas.SetTop(rect, window.Rect.Top / dpi.Y);
+                        rect.Width = (window.Rect.Right - window.Rect.Left + 1) / dpi.X;
+                        rect.Height = (window.Rect.Bottom - window.Rect.Top + 1) / dpi.Y;
+
+                        Console.WriteLine(
+                            "Drawing rect at X={0} Y={1} w={2} h={3}", 
+                            window.Rect.Left / dpi.X, 
+                            window.Rect.Top / dpi.Y, 
+                            rect.Width, 
+                            rect.Height
+                         );
+
+                        canvas.Children.Add(rect);
+
+                        if (e.LeftButton == MouseButtonState.Pressed) {
+                            captureHandler(sender, null);
+                        }
+                    }
+                    break;
+            }
         }
 
-        private void canvas_MouseUp(object sender, MouseButtonEventArgs e) {
-            if (this.captureType != CaptureType.REGION) {
-                return;
+        private void canvas_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
+            if (this.captureType == CaptureType.REGION) {
+                captureHandler(sender, e);
             }
+        }
+
+        private void captureHandler(object sender, MouseButtonEventArgs e) {
             canvas.Children.Remove(rect);
 
             var dpi = GetDPI();
 
             // Capture
             var cap = Capture(
-                (int)(Canvas.GetLeft(rect) * dpi.X), 
+                (int)(Canvas.GetLeft(rect) * dpi.X),
                 (int)(Canvas.GetTop(rect) * dpi.Y),
-                (int)(rect.Width * dpi.X), 
+                (int)(rect.Width * dpi.X),
                 (int)(rect.Height * dpi.Y)
             );
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);

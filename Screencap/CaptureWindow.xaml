@@ -6,5 +6,5 @@
         xmlns:local="clr-namespace:Screencap"
         mc:Ignorable="d"
         Title="Capture" Background="Transparent" WindowStyle="None" AllowsTransparency="True" WindowState="Maximized">
-    <Canvas x:Name="canvas" MouseDown="Canvas_MouseDown" MouseMove="Canvas_MouseMove" MouseUp="canvas_MouseUp" Background="#02000000"/>
+    <Canvas x:Name="canvas" MouseDown="Canvas_MouseDown" MouseMove="Canvas_MouseMove" PreviewMouseLeftButtonUp="canvas_PreviewMouseLeftButtonUp" Background="#02000000"/>
 </Window>

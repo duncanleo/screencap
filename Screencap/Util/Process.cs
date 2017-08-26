@@ -33,7 +33,12 @@ namespace Screencap.Util {
             public System.Drawing.Rectangle rcNormalPosition;
         }
 
-        static List<RECT> GetOpenWindows() {
+        public struct Window {
+            public string Name;
+            public RECT Rect;
+        }
+
+        public static List<Window> GetOpenWindows() {
             return Process.GetProcesses()
                .Where(p => p.MainWindowHandle != IntPtr.Zero)
                .Where(p => !String.IsNullOrEmpty(p.MainWindowTitle))
@@ -42,10 +47,18 @@ namespace Screencap.Util {
                    GetWindowPlacement(p.MainWindowHandle, ref wp);
                    return wp.showCmd != 2; // Minimised
                })
+               .Where(p => p.ProcessName != "ShellExperienceHost")
+               .Where(p => p.Id != Process.GetCurrentProcess().Id)
                .Select(p => {
                    var rect = new RECT();
-                   GetWindowRect(p.MainWindowHandle, out rect);
-                   return rect;
+                   var success = GetWindowRect(p.MainWindowHandle, out rect);
+                   if (!success) {
+                       Console.WriteLine("Error getting rect for {0}", p.MainWindowTitle);
+                   }
+                   return new Window {
+                       Name = p.MainWindowTitle,
+                       Rect = rect
+                   };
                })
                .ToList();
         }
