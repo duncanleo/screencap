@@ -29,8 +29,12 @@ namespace Screencap {
         private System.Windows.Point startPoint;
         private System.Windows.Shapes.Rectangle rect;
 
+        private CaptureType captureType;
+
         public CaptureWindow(CaptureType captureType) {
             InitializeComponent();
+
+            this.captureType = captureType;
 
             switch (captureType) {
                 case CaptureType.FULLSCREEN:
@@ -44,6 +48,10 @@ namespace Screencap {
         }
 
         private void Canvas_MouseDown(object sender, MouseButtonEventArgs e) {
+            if (this.captureType != CaptureType.REGION) {
+                return;
+            }
+
             startPoint = e.GetPosition(canvas);
 
             rect = new System.Windows.Shapes.Rectangle {
@@ -58,7 +66,7 @@ namespace Screencap {
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e) {
-            if (e.LeftButton == MouseButtonState.Released || rect == null)
+            if (e.LeftButton == MouseButtonState.Released || rect == null || this.captureType != CaptureType.REGION)
                 return;
 
             var pos = e.GetPosition(canvas);
@@ -77,6 +85,9 @@ namespace Screencap {
         }
 
         private void canvas_MouseUp(object sender, MouseButtonEventArgs e) {
+            if (this.captureType != CaptureType.REGION) {
+                return;
+            }
             canvas.Children.Remove(rect);
 
             var dpi = GetDPI();
