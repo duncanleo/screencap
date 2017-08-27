@@ -52,8 +52,7 @@ namespace Screencap {
 
                     switch (saveType) {
                         case SaveType.DISK:
-                            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                            cap.Save(System.IO.Path.Combine(path, GenerateFileName()), ImageFormat.Png);
+                            cap.Save(DiskUtil.GenerateDiskFilePath(), ImageFormat.Png);
                             break;
                         case SaveType.CLIPBOARD:
                             Clipboard.SetImage(ConvertBitmap(cap));
@@ -171,8 +170,7 @@ namespace Screencap {
 
             switch(this.saveType) {
                 case SaveType.DISK:
-                    string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    cap.Save(System.IO.Path.Combine(path, GenerateFileName()), ImageFormat.Png);
+                    cap.Save(DiskUtil.GenerateDiskFilePath(), ImageFormat.Png);
                     break;
                 case SaveType.CLIPBOARD:
                     Clipboard.SetImage(ConvertBitmap(cap));
@@ -181,15 +179,6 @@ namespace Screencap {
 
             rect = null;
             Close();
-        }
-
-        private string GenerateFileName() {
-            var dateTime = DateTime.Now;
-            return String.Format(
-                "Screen Shot {0} at {1}.png", 
-                dateTime.ToString("yyyy-MM-dd"),
-                dateTime.ToString("H.mm.ss tt")
-            );
         }
 
         private Bitmap Capture(int left, int top, int width, int height) {
