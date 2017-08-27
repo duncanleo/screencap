@@ -144,7 +144,7 @@ namespace Screencap {
 
                         if (e.LeftButton == MouseButtonState.Pressed) {
                             ProcessUtil.SetForegroundWindow(window.Process.MainWindowHandle);
-                            captureHandler(sender, null);
+                            captureByCanvasRect();
                         }
                     }
                     break;
@@ -153,11 +153,11 @@ namespace Screencap {
 
         private void canvas_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
             if (this.captureType == CaptureType.REGION) {
-                captureHandler(sender, e);
+                captureByCanvasRect();
             }
         }
 
-        private void captureHandler(object sender, MouseButtonEventArgs e) {
+        private void captureByCanvasRect() {
             canvas.Children.Remove(rect);
 
             var dpi = ScreenUtil.GetDPI();
