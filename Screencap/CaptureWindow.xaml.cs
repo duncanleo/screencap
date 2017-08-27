@@ -16,6 +16,7 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using Screencap.Util;
+using System.Windows.Media.Effects;
 
 namespace Screencap {
     public enum CaptureType {
@@ -35,6 +36,7 @@ namespace Screencap {
     public partial class CaptureWindow : Window {
         private System.Windows.Point startPoint;
         private System.Windows.Shapes.Rectangle rect;
+        private TextBlock textBlock;
 
         private CaptureType captureType;
         private SaveType saveType;
@@ -151,9 +153,12 @@ namespace Screencap {
 
                         canvas.Children.Add(rect);
 
+                        drawTargetWindowName(window.Name);
+
                         if (e.LeftButton == MouseButtonState.Pressed) {
                             ProcessUtil.SetForegroundWindow(window.Process.MainWindowHandle);
                             captureByCanvasRect();
+                            canvas.Children.Remove(textBlock);
                         }
                     }
                     break;
@@ -164,6 +169,28 @@ namespace Screencap {
             if (this.captureType == CaptureType.REGION) {
                 captureByCanvasRect();
             }
+        }
+
+        private void drawTargetWindowName(string name) {
+            if (textBlock != null) {
+                canvas.Children.Remove(textBlock);
+            }
+            textBlock = new TextBlock();
+            textBlock.Text = name;
+            textBlock.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0,0,0));
+            textBlock.TextAlignment = TextAlignment.Center;
+            textBlock.FontSize = 17;
+            textBlock.FontWeight = FontWeights.Medium;
+            textBlock.Effect = new DropShadowEffect {
+                Color = new System.Windows.Media.Color { A = 255, R = 255, B = 255, G = 255},
+                Opacity = 1,
+                ShadowDepth = 0,
+                BlurRadius = 35
+            };
+            textBlock.Width = rect.Width;
+            Canvas.SetLeft(textBlock, Canvas.GetLeft(rect));
+            Canvas.SetTop(textBlock, Canvas.GetTop(rect) + rect.Height / 2.0 + rect.Height / 2.5);
+            canvas.Children.Add(textBlock);
         }
 
         private void captureByCanvasRect() {
