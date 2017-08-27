@@ -64,6 +64,15 @@ namespace Screencap {
                     
                     Close();
                     break;
+                case CaptureType.REGION:
+                    Cursor = Cursors.Cross;
+                    break;
+                case CaptureType.WINDOW:
+                    Cursor cameraCursor = new Cursor(
+                        Application.GetResourceStream(new Uri("Images/camera.cur", UriKind.Relative)).Stream
+                    );
+                    Cursor = cameraCursor;
+                    break;
             }
         }
 
