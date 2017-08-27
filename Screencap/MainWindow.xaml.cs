@@ -31,12 +31,16 @@ namespace Screencap {
 
         private void RegionButton_Click(object sender, RoutedEventArgs e) {
             var window = new CaptureWindow(CaptureType.REGION);
-            window.Show();
+            Hide();
+            window.ShowDialog();
+            Show();
         }
 
         private void WindowButton_Click(object sender, RoutedEventArgs e) {
             var window = new CaptureWindow(CaptureType.WINDOW);
-            window.Show();
+            Hide();
+            window.ShowDialog();
+            Show();
         }
     }
 }
