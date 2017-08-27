@@ -14,6 +14,9 @@ namespace Screencap.Util {
         [DllImport("dwmapi.dll")]
         static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out RECT pvAttribute, int cbAttribute);
 
+        [DllImport("dwmapi.dll")]
+        static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out bool pvAttribute, int cbAttribute);
+
         [DllImport("user32.dll")]
         private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
 
@@ -97,6 +100,11 @@ namespace Screencap.Util {
         public static List<Window> GetOpenWindows() {
             return FindWindows()
                 .Where(IsWindowVisible)
+                .Where(winPtr => {
+                    bool isCloaked;
+                    DwmGetWindowAttribute(winPtr, (int)DwmWindowAttribute.DWMWA_CLOAKED, out isCloaked, Marshal.SizeOf(typeof(bool)));
+                    return !isCloaked;
+                })
                 .Select(winPtr => {
                     // Dimensions
                     var rect = new RECT();
@@ -114,6 +122,8 @@ namespace Screencap.Util {
                     };
                 })
                 .Where(win => !String.IsNullOrEmpty(win.Name))
+                .Where(win => win.Name != "Program Manager")
+                .Where(win => win.Process.ProcessName != "progman.exe")
                 .Where(win => win.Process.Id != Process.GetCurrentProcess().Id)
                 .ToList();
         }
