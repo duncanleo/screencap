@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using Screencap.Util;
@@ -42,7 +43,7 @@ namespace Screencap {
                     var screenRes = GetScreenResolution();
                     var cap = Capture(0, 0, (int)screenRes.Width, (int)screenRes.Height);
                     string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    cap.Save(System.IO.Path.Combine(path, GenerateFileName()));
+                    cap.Save(System.IO.Path.Combine(path, GenerateFileName()), ImageFormat.Png);
                     Close();
                     break;
             }
@@ -151,8 +152,9 @@ namespace Screencap {
                 (int)(rect.Width * dpi.X + Left / dpi.X),
                 (int)(rect.Height * dpi.Y + Top/ dpi.Y)
             );
+
             string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            cap.Save(System.IO.Path.Combine(path, GenerateFileName()));
+            cap.Save(System.IO.Path.Combine(path, GenerateFileName()), ImageFormat.Png);
 
             rect = null;
             Close();
