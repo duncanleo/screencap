@@ -55,7 +55,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Util\Process.cs" />
+    <Compile Include="Util\ProcessUtil.cs" />
+    <Compile Include="Util\ScreenUtil.cs" />
     <Page Include="CaptureWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

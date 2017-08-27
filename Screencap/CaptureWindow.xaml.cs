@@ -47,7 +47,7 @@ namespace Screencap {
 
             switch (captureType) {
                 case CaptureType.FULLSCREEN:
-                    var screenRes = GetScreenResolution();
+                    var screenRes = ScreenUtil.GetScreenResolution();
                     var cap = Capture(0, 0, (int)screenRes.Width, (int)screenRes.Height);
 
                     switch (saveType) {
@@ -88,7 +88,7 @@ namespace Screencap {
                 return;
 
             var pos = e.GetPosition(canvas);
-            var dpi = GetDPI();
+            var dpi = ScreenUtil.GetDPI();
 
             switch (this.captureType) {
                 case CaptureType.REGION:
@@ -158,8 +158,8 @@ namespace Screencap {
         private void captureHandler(object sender, MouseButtonEventArgs e) {
             canvas.Children.Remove(rect);
 
-            var dpi = GetDPI();
-            var res = GetScreenResolution();
+            var dpi = ScreenUtil.GetDPI();
+            var res = ScreenUtil.GetScreenResolution();
 
             // Capture
             var cap = Capture(
@@ -181,30 +181,6 @@ namespace Screencap {
 
             rect = null;
             Close();
-        }
-
-        private dynamic GetDPI() {
-            Window MainWindow = Application.Current.MainWindow;
-            PresentationSource MainWindowPresentationSource = PresentationSource.FromVisual(MainWindow);
-            Matrix m = MainWindowPresentationSource.CompositionTarget.TransformToDevice;
-            var DpiWidthFactor = m.M11;
-            var DpiHeightFactor = m.M22;
-
-            return new {
-                X = m.M11,
-                Y = m.M22
-            };
-        }
-
-        private dynamic GetScreenResolution() {
-            var dpi = GetDPI();
-            double ScreenHeight = SystemParameters.PrimaryScreenHeight * dpi.Y;
-            double ScreenWidth = SystemParameters.PrimaryScreenWidth * dpi.X;
-
-            return new {
-                Height = ScreenHeight,
-                Width = ScreenWidth
-            };
         }
 
         private string GenerateFileName() {
