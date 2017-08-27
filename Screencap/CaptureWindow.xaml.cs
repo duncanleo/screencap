@@ -24,6 +24,11 @@ namespace Screencap {
         WINDOW
     }
 
+    public enum SaveType {
+        DISK,
+        CLIPBOARD
+    }
+
     /// <summary>
     /// Interaction logic for CaptureWindow.xaml
     /// </summary>
@@ -32,18 +37,29 @@ namespace Screencap {
         private System.Windows.Shapes.Rectangle rect;
 
         private CaptureType captureType;
+        private SaveType saveType;
 
-        public CaptureWindow(CaptureType captureType) {
+        public CaptureWindow(CaptureType captureType, SaveType saveType = SaveType.DISK) {
             InitializeComponent();
 
             this.captureType = captureType;
+            this.saveType = saveType;
 
             switch (captureType) {
                 case CaptureType.FULLSCREEN:
                     var screenRes = GetScreenResolution();
                     var cap = Capture(0, 0, (int)screenRes.Width, (int)screenRes.Height);
-                    string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    cap.Save(System.IO.Path.Combine(path, GenerateFileName()), ImageFormat.Png);
+
+                    switch (saveType) {
+                        case SaveType.DISK:
+                            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                            cap.Save(System.IO.Path.Combine(path, GenerateFileName()), ImageFormat.Png);
+                            break;
+                        case SaveType.CLIPBOARD:
+                            Clipboard.SetImage(ConvertBitmap(cap));
+                            break;
+                    }
+                    
                     Close();
                     break;
             }
@@ -153,8 +169,15 @@ namespace Screencap {
                 (int)(rect.Height * dpi.Y + Top/ dpi.Y)
             );
 
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            cap.Save(System.IO.Path.Combine(path, GenerateFileName()), ImageFormat.Png);
+            switch(this.saveType) {
+                case SaveType.DISK:
+                    string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    cap.Save(System.IO.Path.Combine(path, GenerateFileName()), ImageFormat.Png);
+                    break;
+                case SaveType.CLIPBOARD:
+                    Clipboard.SetImage(ConvertBitmap(cap));
+                    break;
+            }
 
             rect = null;
             Close();
@@ -208,6 +231,15 @@ namespace Screencap {
             Show();
 
             return bitmap;
+        }
+
+        private BitmapSource ConvertBitmap(Bitmap bitmap) {
+            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                                bitmap.GetHbitmap(),
+                                IntPtr.Zero,
+                                Int32Rect.Empty,
+                                BitmapSizeOptions.FromEmptyOptions()
+                            );
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) {
