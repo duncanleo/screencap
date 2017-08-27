@@ -38,6 +38,8 @@ namespace Screencap {
         private System.Windows.Shapes.Rectangle rect;
         private TextBlock textBlock;
 
+        private List<ProcessUtil.Window> windows = ProcessUtil.GetOpenWindows();
+
         private CaptureType captureType;
         private SaveType saveType;
 
@@ -118,7 +120,7 @@ namespace Screencap {
                     Canvas.SetTop(rect, y);
                     break;
                 case CaptureType.WINDOW:
-                    var window = ProcessUtil.GetOpenWindows()
+                    var window = windows
                         .Where(win => pos.X >= win.Rect.Left / dpi.X && 
                                         pos.X <= win.Rect.Right / dpi.X && 
                                         pos.Y >= win.Rect.Top / dpi.Y && 
