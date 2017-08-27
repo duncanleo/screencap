@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using Screencap.Util;
 using System.Windows.Media.Effects;
+using System.Media;
 
 namespace Screencap {
     public enum CaptureType {
@@ -56,6 +57,7 @@ namespace Screencap {
                     Hide();
                     var cap = ImageUtil.CaptureScreenshot(0, 0, (int)screenRes.Width, (int)screenRes.Height);
                     Show();
+                    playShutterSound();
 
                     switch (saveType) {
                         case SaveType.DISK:
@@ -210,6 +212,7 @@ namespace Screencap {
                 (int)(rect.Height * dpi.Y + Top/ dpi.Y)
             );
             Show();
+            playShutterSound();
 
             switch(this.saveType) {
                 case SaveType.DISK:
@@ -228,6 +231,11 @@ namespace Screencap {
             if (e.Key == Key.Escape) {
                 Close();
             }
+        }
+
+        private void playShutterSound() {
+            SoundPlayer player = new SoundPlayer(Properties.Resources.capture);
+            player.Play();
         }
     }
 }

@@ -108,5 +108,11 @@
   <ItemGroup>
     <Resource Include="Images\camera.cur" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\capture.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Audio\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
