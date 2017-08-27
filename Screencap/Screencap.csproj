@@ -56,6 +56,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Util\DiskUtil.cs" />
+    <Compile Include="Util\ImageUtil.cs" />
     <Compile Include="Util\ProcessUtil.cs" />
     <Compile Include="Util\ScreenUtil.cs" />
     <Page Include="CaptureWindow.xaml">

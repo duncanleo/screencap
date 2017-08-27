@@ -48,14 +48,17 @@ namespace Screencap {
             switch (captureType) {
                 case CaptureType.FULLSCREEN:
                     var screenRes = ScreenUtil.GetScreenResolution();
-                    var cap = Capture(0, 0, (int)screenRes.Width, (int)screenRes.Height);
+
+                    Hide();
+                    var cap = ImageUtil.CaptureScreenshot(0, 0, (int)screenRes.Width, (int)screenRes.Height);
+                    Show();
 
                     switch (saveType) {
                         case SaveType.DISK:
                             cap.Save(DiskUtil.GenerateDiskFilePath(), ImageFormat.Png);
                             break;
                         case SaveType.CLIPBOARD:
-                            Clipboard.SetImage(ConvertBitmap(cap));
+                            Clipboard.SetImage(ImageUtil.ConvertBitmapToBitmapSource(cap));
                             break;
                     }
                     
@@ -161,50 +164,26 @@ namespace Screencap {
             var res = ScreenUtil.GetScreenResolution();
 
             // Capture
-            var cap = Capture(
+            Hide();
+            var cap = ImageUtil.CaptureScreenshot(
                 (int)(Canvas.GetLeft(rect) * dpi.X + Left),
                 (int)(Canvas.GetTop(rect) * dpi.Y + Top),
                 (int)(rect.Width * dpi.X + Left / dpi.X),
                 (int)(rect.Height * dpi.Y + Top/ dpi.Y)
             );
+            Show();
 
             switch(this.saveType) {
                 case SaveType.DISK:
                     cap.Save(DiskUtil.GenerateDiskFilePath(), ImageFormat.Png);
                     break;
                 case SaveType.CLIPBOARD:
-                    Clipboard.SetImage(ConvertBitmap(cap));
+                    Clipboard.SetImage(ImageUtil.ConvertBitmapToBitmapSource(cap));
                     break;
             }
 
             rect = null;
             Close();
-        }
-
-        private Bitmap Capture(int left, int top, int width, int height) {
-            Hide();
-            Bitmap bitmap = new Bitmap(width, height);
-
-            using (Graphics g = Graphics.FromImage(bitmap)) {
-                g.CopyFromScreen(
-                    new System.Drawing.Point(left, top),
-                    new System.Drawing.Point(0, 0),
-                    bitmap.Size
-                );
-            }
-
-            Show();
-
-            return bitmap;
-        }
-
-        private BitmapSource ConvertBitmap(Bitmap bitmap) {
-            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                                bitmap.GetHbitmap(),
-                                IntPtr.Zero,
-                                Int32Rect.Empty,
-                                BitmapSizeOptions.FromEmptyOptions()
-                            );
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) {
