@@ -22,6 +22,24 @@ namespace Screencap.Util {
         [DllImport("dwmapi.dll")]
         static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out RECT pvAttribute, int cbAttribute);
 
+        [DllImport("user32.dll")]
+        private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+
+        protected delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        protected static extern int GetWindowText(IntPtr hWnd, StringBuilder strText, int maxCount);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool IsWindowVisible(IntPtr hWnd);
+
         [Flags]
         public enum DwmWindowAttribute : uint {
             DWMWA_NCRENDERING_ENABLED = 1,
@@ -65,32 +83,56 @@ namespace Screencap.Util {
             public Process Process;
         }
 
+        /// <summary> Get the text for the window pointed to by hWnd </summary>
+        public static string GetWindowText(IntPtr hWnd) {
+            int size = GetWindowTextLength(hWnd);
+            if (size > 0) {
+                var builder = new StringBuilder(size + 1);
+                GetWindowText(hWnd, builder, builder.Capacity);
+                return builder.ToString();
+            }
+
+            return String.Empty;
+        }
+
+        /// <summary> Find all windows </summary>
+        private static IEnumerable<IntPtr> FindWindows() {
+            IntPtr found = IntPtr.Zero;
+            List<IntPtr> windows = new List<IntPtr>();
+
+            EnumWindows(delegate (IntPtr wnd, IntPtr param)
+            {
+                windows.Add(wnd);
+
+                // but return true here so that we iterate all windows
+                return true;
+            }, IntPtr.Zero);
+
+            return windows;
+        }
+
         public static List<Window> GetOpenWindows() {
-            return Process.GetProcesses()
-               .Where(p => p.MainWindowHandle != IntPtr.Zero)
-               .Where(p => !String.IsNullOrEmpty(p.MainWindowTitle))
-               .Where(p => {
-                   WINDOWPLACEMENT wp = new WINDOWPLACEMENT();
-                   GetWindowPlacement(p.MainWindowHandle, ref wp);
-                   return wp.showCmd != 2; // Minimised
-               })
-               .Where(p => p.ProcessName != "ShellExperienceHost")
-               .Where(p => p.Id != Process.GetCurrentProcess().Id)
-               .Select(p => {
-                   var rect = new RECT();
-                   int size = Marshal.SizeOf(typeof(RECT));
-                   DwmGetWindowAttribute(p.MainWindowHandle, (int)DwmWindowAttribute.DWMWA_EXTENDED_FRAME_BOUNDS, out rect, size);
-                   //var success = GetWindowRect(p.MainWindowHandle, out rect);
-                   //if (!success) {
-                   //    Console.WriteLine("Error getting rect for {0}", p.MainWindowTitle);
-                   //}
-                   return new Window {
-                       Name = p.MainWindowTitle,
-                       Rect = rect,
-                       Process = p
-                   };
-               })
-               .ToList();
+            return FindWindows()
+                .Where(IsWindowVisible)
+                .Select(winPtr => {
+                    // Dimensions
+                    var rect = new RECT();
+                    int size = Marshal.SizeOf(typeof(RECT));
+                    DwmGetWindowAttribute(winPtr, (int)DwmWindowAttribute.DWMWA_EXTENDED_FRAME_BOUNDS, out rect, size);
+
+                    // Process
+                    uint processId;
+                    GetWindowThreadProcessId(winPtr, out processId);
+
+                    return new Window {
+                        Name = GetWindowText(winPtr),
+                        Rect = rect,
+                        Process = Process.GetProcessById((int)processId)
+                    };
+                })
+                .Where(win => !String.IsNullOrEmpty(win.Name))
+                .Where(win => win.Process.Id != Process.GetCurrentProcess().Id)
+                .ToList();
         }
     }
 }
