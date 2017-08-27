@@ -8,14 +8,6 @@ using System.Runtime.InteropServices;
 
 namespace Screencap.Util {
     class ProcessUtil {
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
-
         [DllImport("USER32.DLL")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
@@ -66,15 +58,6 @@ namespace Screencap.Util {
             public int Top;         // y position of upper-left corner
             public int Right;       // x position of lower-right corner
             public int Bottom;      // y position of lower-right corner
-        }
-
-        private struct WINDOWPLACEMENT {
-            public int length;
-            public int flags;
-            public int showCmd;
-            public System.Drawing.Point ptMinPosition;
-            public System.Drawing.Point ptMaxPosition;
-            public System.Drawing.Rectangle rcNormalPosition;
         }
 
         public struct Window {
