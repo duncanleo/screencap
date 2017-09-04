@@ -15,4 +15,3 @@ deploy:
   auth_token: $(GITHUB_ACCESS_TOKEN)
   prerelease: true
   draft: false
-  on:
