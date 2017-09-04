@@ -9,7 +9,7 @@ artifacts:
   - path: Screencap\bin\$(configuration)
     name: Screencap
 deploy:
-  release: screencap-v$(APPVEYOR_BUILD_ID)
+  release: screencap-v$(APPVEYOR_BUILD_NUMBER)
   description: Release from branch '$(APPVEYOR_REPO_BRANCH)'
   provider: GitHub
   auth_token: $(GITHUB_ACCESS_TOKEN)
