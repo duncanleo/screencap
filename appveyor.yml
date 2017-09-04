@@ -9,11 +9,10 @@ artifacts:
   - path: Screencap\bin\$(configuration)
     name: Screencap
 deploy:
-  release: screencap-v$(appveyor_build_version)
+  release: screencap-v$(APPVEYOR_REPO_COMMIT)
   description: 'Release'
   provider: GitHub
   auth_token: $(GITHUB_ACCESS_TOKEN)
   prerelease: true
   draft: false
   on:
-    appveyor_repo_tag: true
